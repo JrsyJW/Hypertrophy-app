@@ -1,0 +1,1533 @@
+import { useState, useEffect, useRef } from "react";
+
+var DAYS = [
+  {
+    day: "Monday", focus: "Chest + Triceps + Core", tag: "PUSH A", color: "#E8453C",
+    equipment: ["Bench Press & Squat Rack", "Bowflex 1090 DBs", "Adjustable Bench"],
+    note: "TRT & Sermorelin optimize protein synthesis. Prioritize progressive overload on compound lifts. BPC-157 supports connective tissue recovery.",
+    supersets: [
+      { label: "Superset 1", exercises: [
+        { name: "Barbell Bench Press", sets: "3 x 8-12", numSets: 3, log: "combined", muscles: ["Chest (Primary)", "Triceps (Secondary)", "Anterior Deltoid"], equipment: "Bench Press & Squat Rack + Barbell Converter", why: "King of chest mass. Rack enables heavy progressive overload. TRT amplifies recovery so you can push heavier loads safely.", vid: "rT7DgCr-3pg" },
+        { name: "Dumbbell Flyes", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["Chest (Isolation)", "Anterior Deltoid"], equipment: "Bowflex 552 DBs + Adjustable Bench (flat)", why: "Paired after bench to pre-exhaust chest in stretched position, maximizing time-under-tension without taxing triceps further.", vid: "eozdVDA78K0" },
+      ]},
+      { label: "Superset 2", exercises: [
+        { name: "Incline DB Press", sets: "3 x 8-12", numSets: 3, log: "combined", muscles: ["Upper Chest (Primary)", "Anterior Deltoid", "Triceps"], equipment: "Bowflex 1090 DBs + Adjustable Bench (incline)", why: "Upper chest is often underdeveloped. Incline shifts load to clavicular head for complete chest development.", vid: "8iPEnn-ltC8" },
+        { name: "Overhead DB Tricep Extension", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["Triceps Long Head (Primary)"], equipment: "Bowflex 552 DBs", why: "Long head is the largest tricep portion and only trained in stretched position overhead.", vid: "YbX7Wd8jQ-Q" },
+      ]},
+      { label: "Finisher - Core", exercises: [
+        { name: "DB Russian Twist", sets: "3 x 20", numSets: 3, log: "combined", muscles: ["Obliques (Primary)", "Rectus Abdominis", "Hip Flexors"], equipment: "Bowflex 552 DBs", why: "Weighted rotational core work for oblique definition. Hits both anti-rotation stability and dynamic rotation.", vid: "wkD8rjkodUI" },
+      ]},
+    ],
+  },
+  {
+    day: "Tuesday", focus: "Back + Biceps", tag: "PULL A", color: "#2D7FF9",
+    equipment: ["Bowflex 1090 DBs", "Barbell Converter", "Squat Rack", "Adjustable Bench"],
+    note: "Sermorelin elevates GH pulses overnight. Tuesday training capitalizes on Sunday/Monday rest-driven hormonal peaks.",
+    supersets: [
+      { label: "Superset 1", exercises: [
+        { name: "Barbell Bent-Over Row", sets: "3 x 8-10", numSets: 3, log: "combined", muscles: ["Lats (Primary)", "Rhomboids", "Middle Traps", "Biceps (Secondary)"], equipment: "Squat Rack + Barbell Converter", why: "Heaviest compound back movement. Barbell allows maximal loading for lat thickness.", vid: "9efgcAjQe7E" },
+        { name: "DB Hammer Curl", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["Brachialis (Primary)", "Biceps Brachii", "Brachioradialis"], equipment: "Bowflex 552 DBs", why: "Brachialis sits under the bicep and pushes the bicep peak higher when developed. Neutral grip reduces wrist strain.", vid: "TwD-YGVP4Bk" },
+      ]},
+      { label: "Superset 2", exercises: [
+        { name: "Single-Arm DB Row", sets: "3 x 10-12 each", numSets: 3, log: "per-side", muscles: ["Lats (Primary)", "Teres Major", "Rear Deltoid", "Biceps"], equipment: "Bowflex 1090 DBs + Adjustable Bench", why: "Unilateral rowing eliminates bilateral deficit, ensuring each side develops equally.", vid: "pYcpY20QaE8" },
+        { name: "DB Concentration Curl", sets: "3 x 10-12", numSets: 3, log: "per-side", muscles: ["Biceps Brachii (Peak Isolation)"], equipment: "Bowflex 552 DBs", why: "Best isolation for bicep peak. Supersetted with rows so biceps are pre-fatigued for maximum hypertrophic stimulus.", vid: "Jvj2wV0vOYU" },
+      ]},
+      { label: "Superset 3", exercises: [
+        { name: "DB Pullover", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["Lats", "Serratus Anterior", "Long Head Tricep"], equipment: "Bowflex 1090 DBs + Adjustable Bench", why: "Stretches lats through full ROM, a growth signal rarely triggered by rows alone.", vid: "FK4rHfGSBjA" },
+        { name: "Incline DB Curl", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["Biceps Long Head (Stretch Position)"], equipment: "Bowflex 552 DBs + Incline Bench", why: "Incline fully stretches the long head of the bicep responsible for peak height.", vid: "sBzB9_1SJYE" },
+      ]},
+    ],
+  },
+  {
+    day: "Wednesday", focus: "Legs + Glutes", tag: "LEGS A", color: "#00B383",
+    equipment: ["Squat Rack", "Barbell Converter", "Bowflex 552 DB + KB Converter", "Bowflex 1090 DBs", "Adjustable Bench"],
+    note: "Leg training releases the most testosterone and GH. Combined with TRT and Sermorelin, this drives systemic anabolic signaling for your entire body.",
+    supersets: [
+      { label: "Compound Block", exercises: [
+        { name: "Barbell Back Squat", sets: "3 x 8-10", numSets: 3, log: "combined", muscles: ["Quads (Primary)", "Glutes", "Hamstrings", "Core Stabilizers"], equipment: "Squat Rack + Barbell Converter", why: "The foundational mass builder. No exercise drives more lower-body hypertrophy or systemic anabolic hormone release.", vid: "bEv6CCg2BC8" },
+        { name: "Romanian Deadlift (RDL)", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["Hamstrings (Primary)", "Glutes", "Erector Spinae"], equipment: "Barbell Converter or Bowflex 1090 DBs", why: "RDL targets the hamstring in stretched position, the most anabolic stimulus for hamstring growth.", vid: "_oyxCn2iSjU" },
+      ]},
+      { label: "Superset 1", exercises: [
+        { name: "DB Bulgarian Split Squat", sets: "3 x 10 each leg", numSets: 3, log: "per-side", muscles: ["Quads (Primary)", "Glutes", "Hip Flexors"], equipment: "Bowflex 1090 DBs + Adjustable Bench (rear foot elevated)", why: "Unilateral loading corrects leg imbalances. Rear foot elevation increases hip flexor stretch and glute recruitment.", vid: "2C-uNgKwPLE" },
+        { name: "Kettlebell Swing", sets: "3 x 15", numSets: 3, log: "combined", muscles: ["Glutes (Primary)", "Hamstrings", "Core", "Erector Spinae"], equipment: "Bowflex 552 DB + KB Converter", why: "52.5 lbs ideal for swings. Technique and hip power drive this movement, not raw load.", vid: "sSESeQAir2M" },
+      ]},
+      { label: "Finisher", exercises: [
+        { name: "DB Step-Up", sets: "3 x 12 each leg", numSets: 3, log: "per-side", muscles: ["Glutes (Primary)", "Quads", "Hamstrings", "Calves"], equipment: "Bowflex 552 DBs + Adjustable Bench", why: "Controlled unilateral glute emphasis. Bench height controls difficulty with low joint fatigue.", vid: "dQqApCGd5Ss" },
+      ]},
+    ],
+  },
+  {
+    day: "Thursday", focus: "Shoulders + Core", tag: "PUSH B", color: "#F5A623",
+    equipment: ["Bowflex 1090 DBs", "Bowflex 552 DBs", "Barbell Converter", "Squat Rack", "Adjustable Bench"],
+    note: "Dedicated shoulder day ensures full deltoid development. 3D shoulder development is key to a lean, wide physique.",
+    supersets: [
+      { label: "Superset 1", exercises: [
+        { name: "Barbell Overhead Press", sets: "3 x 8-10", numSets: 3, log: "combined", muscles: ["Anterior & Medial Deltoid (Primary)", "Triceps", "Upper Traps"], equipment: "Squat Rack + Barbell Converter", why: "Heaviest shoulder movement with your setup. Barbell OHP builds raw overhead strength better than any dumbbell variation.", vid: "2yjwXTZQDDI" },
+        { name: "DB Lateral Raise", sets: "3 x 12-15", numSets: 3, log: "combined", muscles: ["Medial Deltoid (Isolation)"], equipment: "Bowflex 552 DBs", why: "Medial delts give the shoulder width and roundness. Direct lateral raise work is non-negotiable for 3D delts.", vid: "3VcKaXpzqRo" },
+      ]},
+      { label: "Superset 2", exercises: [
+        { name: "DB Arnold Press", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["All 3 Deltoid Heads", "Triceps", "Upper Traps"], equipment: "Bowflex 1090 DBs + Adjustable Bench", why: "Rotation through the press recruits all three deltoid heads in one movement.", vid: "6Z15_WdXmVw" },
+        { name: "DB Rear Delt Fly (Bent-Over)", sets: "3 x 12-15", numSets: 3, log: "combined", muscles: ["Posterior Deltoid (Primary)", "Rhomboids", "Middle Traps"], equipment: "Bowflex 552 DBs", why: "Rear delts are KEY for shoulder health and posture. Critical for long-term shoulder integrity on TRT.", vid: "EA7u4Q_8HQ0" },
+      ]},
+      { label: "Superset 3 - Core", exercises: [
+        { name: "DB Plank Row", sets: "3 x 10 each side", numSets: 3, log: "per-side", muscles: ["Core Stabilizers", "Obliques", "Lats", "Rear Deltoid"], equipment: "Bowflex 552 DBs", why: "Anti-rotation core training is the most functional core exercise. Builds deep stabilizing muscles for injury prevention.", vid: "TxTNxBAN_0A" },
+        { name: "DB Russian Twist", sets: "3 x 20", numSets: 3, log: "combined", muscles: ["Obliques (Primary)", "Rectus Abdominis", "Hip Flexors"], equipment: "Bowflex 552 DBs", why: "Weighted rotational core work for oblique definition. Hits both anti-rotation stability and dynamic rotation.", vid: "wkD8rjkodUI" },
+      ]},
+    ],
+  },
+  {
+    day: "Friday", focus: "Chest + Triceps", tag: "PUSH C", color: "#9B59F5",
+    equipment: ["Bowflex 1090 DBs", "Bowflex 552 DBs", "Barbell Converter", "Squat Rack", "Adjustable Bench"],
+    note: "Second chest/tricep session uses different angles and rep ranges. Variation in tension angles is key for complete hypertrophy.",
+    supersets: [
+      { label: "Superset 1", exercises: [
+        { name: "Decline DB Press", sets: "3 x 8-12", numSets: 3, log: "combined", muscles: ["Lower Chest (Primary)", "Triceps", "Anterior Deltoid"], equipment: "Bowflex 1090 DBs + Adjustable Bench (decline)", why: "Lower chest undertrained on Monday. Decline shifts load to sternal head of pec for complete chest architecture.", vid: "OR7OULkT_Vg" },
+        { name: "Close-Grip Barbell Press", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["Triceps (All 3 Heads)", "Inner Chest"], equipment: "Squat Rack + Barbell Converter", why: "Maximizes tricep loading with a barbell. Close grip builds the horseshoe shape.", vid: "nEF0bv2FW7s" },
+      ]},
+      { label: "Superset 2", exercises: [
+        { name: "DB Squeeze Press", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["Inner Chest (Primary)", "Chest", "Triceps"], equipment: "Bowflex 1090 DBs + Adjustable Bench", why: "Pressing dumbbells together creates constant adduction force, uniquely targeting inner chest and sternal fibers.", vid: "1iQt5BwSWYg" },
+        { name: "DB Tricep Kickback", sets: "3 x 12-15", numSets: 3, log: "combined", muscles: ["Triceps Lateral Head (Isolation)"], equipment: "Bowflex 552 DBs", why: "Isolates the lateral head for the visible horseshoe shape. Peak contraction at full extension.", vid: "6SS6K3lAwZ8" },
+      ]},
+      { label: "Finisher", exercises: [
+        { name: "DB Pullover to Press", sets: "3 x 12", numSets: 3, log: "combined", muscles: ["Chest", "Lats", "Serratus Anterior", "Triceps"], equipment: "Bowflex 1090 DBs + Adjustable Bench", why: "Combines a full lat stretch with a chest press. Hits chest through complete ROM including the stretched position.", vid: "Jf43P3wCzYU" },
+      ]},
+    ],
+  },
+  {
+    day: "Saturday", focus: "Back + Biceps + Legs", tag: "PULL B + LEGS B", color: "#E84393",
+    equipment: ["Bowflex 1090 DBs", "Bowflex 552 DBs + KB Converter", "Barbell Converter", "Squat Rack", "Adjustable Bench"],
+    note: "Full posterior chain day. Second weekly hit on back, biceps, hamstrings, and glutes maximizes the 2x/week frequency goal.",
+    supersets: [
+      { label: "Superset 1 - Back", exercises: [
+        { name: "Barbell Deadlift", sets: "3 x 6-8", numSets: 3, log: "combined", muscles: ["Entire Posterior Chain", "Lats", "Traps", "Glutes", "Hamstrings", "Erector Spinae"], equipment: "Squat Rack + Barbell Converter", why: "The single most anabolic movement. Lower rep range allows heavier loads than Tuesday's rows. BPC-157 supports tendons and ligaments.", vid: "3UwO0fKukRw" },
+        { name: "DB Zottman Curl", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["Biceps (Supinated Up)", "Brachialis & Forearms (Pronated Down)"], equipment: "Bowflex 552 DBs", why: "Trains both supinated and pronated paths, double the stimulus per rep. Prevents adaptation from Tuesday's curls.", vid: "ZrpRBgswtHs" },
+      ]},
+      { label: "Superset 2 - Back & Glutes", exercises: [
+        { name: "DB Sumo Romanian Deadlift", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["Glutes (Primary)", "Inner Hamstrings", "Adductors"], equipment: "Bowflex 1090 DBs", why: "Wide stance shifts emphasis onto glutes and inner hamstrings, different stimulus from Wednesday's conventional RDL.", vid: "nQqVbnvjSGE" },
+        { name: "DB Renegade Row", sets: "3 x 10 each arm", numSets: 3, log: "per-side", muscles: ["Lats", "Rhomboids", "Core Stabilizers", "Triceps"], equipment: "Bowflex 552 DBs", why: "Back rowing combined with anti-rotation core stability in one movement.", vid: "ZMW_vIWH5D8" },
+      ]},
+      { label: "Finisher", exercises: [
+        { name: "Goblet Squat", sets: "3 x 12-15", numSets: 3, log: "combined", muscles: ["Quads (Primary)", "Glutes", "Core"], equipment: "Bowflex 552 DB + KB Converter", why: "52.5 lbs perfect for 12-15 rep goblet squats. Upright torso maximizes quad activation.", vid: "MeIiIdhvXT4" },
+      ]},
+      { label: "Superset 4 - Spider Curls", exercises: [
+        { name: "DB Spider Curl", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["Biceps Brachii (Full Stretch)", "Brachialis"], equipment: "Bowflex 552 DBs + Adjustable Bench (incline, prone)", why: "Arms hanging off the bench maximizes the stretch at the bottom of every rep for peak bicep hypertrophy.", vid: "NJnmRX4Od6c" },
+        { name: "DB Spider Hammer Curl", sets: "3 x 10-12", numSets: 3, log: "combined", muscles: ["Brachialis (Primary)", "Biceps Brachii", "Brachioradialis"], equipment: "Bowflex 552 DBs + Adjustable Bench (incline, prone)", why: "Neutral grip in prone position shifts emphasis to the brachialis and forearm for complete arm development.", vid: "TwD-YGVP4Bk" },
+      ]},
+    ],
+  },
+];
+
+var LS_LOGS     = "hp_logs_v1";
+var LS_HISTORY  = "hp_history_v1";
+var LS_OPTIONAL = "hp_optional_v1";
+var LS_THEME    = "hp_theme_v1";
+var LS_PRS      = "hp_prs_v1";
+var LS_NOTES    = "hp_notes_v1";
+
+function makeKey(di, si, ei) { return di + "-" + si + "-" + ei; }
+function todayLabel() { return new Date().toLocaleDateString("en-US", { weekday:"long", year:"numeric", month:"long", day:"numeric" }); }
+function todayISO() { return new Date().toISOString().slice(0, 10); }
+function isComplete(sl) { return sl.length > 0 && sl.every(function(s) { return s.weight !== "" && s.reps !== ""; }); }
+
+function lsGet(key) {
+  try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch(e) { return null; }
+}
+function lsSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); return true; } catch(e) { return false; }
+}
+
+function calc1RM(weight, reps) {
+  if (!weight || !reps || reps < 1) return null;
+  return Math.round(parseFloat(weight) * (1 + parseInt(reps) / 30));
+}
+
+function getLastSession(dayName) {
+  var history = lsGet(LS_HISTORY) || [];
+  var today = todayISO();
+  var matches = history.filter(function(h) { return h.dayName === dayName && h.dateKey !== today; });
+  matches.sort(function(a, b) { return b.dateKey.localeCompare(a.dateKey); });
+  return matches[0] || null;
+}
+
+function getLastBest(dayName, exName) {
+  var session = getLastSession(dayName);
+  if (!session) return null;
+  var ex = null;
+  for (var i = 0; i < session.exercises.length; i++) {
+    if (session.exercises[i].name === exName) { ex = session.exercises[i]; break; }
+  }
+  if (!ex || !ex.sets || !ex.sets.length) return null;
+  var best = ex.sets[0];
+  for (var j = 1; j < ex.sets.length; j++) {
+    if ((parseFloat(ex.sets[j].weight) || 0) > (parseFloat(best.weight) || 0)) best = ex.sets[j];
+  }
+  return best;
+}
+
+function getOverloadSuggestion(dayName, exName) {
+  var last = getLastBest(dayName, exName);
+  if (!last || !last.weight || !last.reps) return null;
+  var w = parseFloat(last.weight);
+  var r = parseInt(last.reps);
+  if (r >= 12) {
+    var inc = w >= 100 ? 5 : 2.5;
+    return { type: "increase", message: "You hit " + r + " reps last time - try " + (w + inc) + " lbs today" };
+  }
+  return { type: "maintain", message: "Aim for more reps at " + w + " lbs (last: " + r + " reps)" };
+}
+
+function getWeeklyVolume() {
+  var history = lsGet(LS_HISTORY) || [];
+  var now = new Date();
+  var weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - now.getDay());
+  weekStart.setHours(0, 0, 0, 0);
+  var weekStartStr = weekStart.toISOString().slice(0, 10);
+  var thisWeek = history.filter(function(h) { return h.dateKey >= weekStartStr; });
+  var muscleVol = {};
+  thisWeek.forEach(function(session) {
+    session.exercises.forEach(function(ex) {
+      if (ex.isPlank) return;
+      var primary = (ex.muscles[0] || "Other").replace(/\s*\(.*?\)/, "").trim();
+      muscleVol[primary] = (muscleVol[primary] || 0) + ex.totalVolume;
+    });
+  });
+  return muscleVol;
+}
+
+function getStreak() {
+  var history = lsGet(LS_HISTORY) || [];
+  if (!history.length) return 0;
+  var weeks = {};
+  history.forEach(function(h) {
+    var d = new Date(h.dateKey + "T12:00:00");
+    var day = d.getDay();
+    var sunday = new Date(d);
+    sunday.setDate(d.getDate() - day);
+    weeks[sunday.toISOString().slice(0, 10)] = true;
+  });
+  var now = new Date();
+  var thisSunday = new Date(now);
+  thisSunday.setDate(now.getDate() - now.getDay());
+  thisSunday.setHours(0, 0, 0, 0);
+  var streak = 0;
+  var checkDate = new Date(thisSunday);
+  for (var i = 0; i < 52; i++) {
+    var key = checkDate.toISOString().slice(0, 10);
+    if (weeks[key]) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 7);
+    } else {
+      if (i === 0) { checkDate.setDate(checkDate.getDate() - 7); continue; }
+      break;
+    }
+  }
+  return streak;
+}
+
+function getPRs() { return lsGet(LS_PRS) || {}; }
+
+function checkAndUpdatePR(exName, weight, reps) {
+  if (!weight || !reps) return false;
+  var prs = getPRs();
+  var w = parseFloat(weight);
+  var r = parseInt(reps);
+  var est1RM = Math.round(w * (1 + r / 30));
+  var prev = prs[exName];
+  if (!prev || est1RM > prev.est1RM) {
+    prs[exName] = { weight: w, reps: r, est1RM: est1RM, date: todayISO() };
+    lsSet(LS_PRS, prs);
+    return true;
+  }
+  return false;
+}
+
+function getMuscleRecovery() {
+  var history = lsGet(LS_HISTORY) || [];
+  var now = new Date();
+  var muscleMap = {
+    "Chest": ["Chest", "Upper Chest", "Lower Chest", "Inner Chest"],
+    "Triceps": ["Triceps"],
+    "Shoulders": ["Deltoid", "Anterior", "Medial"],
+    "Back": ["Lats", "Rhomboids", "Teres", "Serratus", "Mid-Back", "Erector"],
+    "Biceps": ["Biceps", "Brachialis", "Brachioradialis"],
+    "Core": ["Obliques", "Rectus Abdominis", "Core", "Abs"],
+    "Quads": ["Quads"],
+    "Hamstrings": ["Hamstrings"],
+    "Glutes": ["Glutes"],
+    "Forearms": ["Forearms"],
+  };
+  var recovery = {};
+  Object.keys(muscleMap).forEach(function(muscle) {
+    var mostRecent = null;
+    history.forEach(function(session) {
+      (session.exercises || []).forEach(function(ex) {
+        var matchesMuscle = (ex.muscles || []).some(function(m) {
+          return muscleMap[muscle].some(function(keyword) { return m.indexOf(keyword) !== -1; });
+        });
+        if (matchesMuscle) {
+          var d = new Date(session.dateKey + "T12:00:00");
+          if (!mostRecent || d > mostRecent) mostRecent = d;
+        }
+      });
+    });
+    if (!mostRecent) { recovery[muscle] = null; return; }
+    recovery[muscle] = Math.round((now - mostRecent) / (1000 * 60 * 60));
+  });
+  return recovery;
+}
+
+function buildSession(logs, di, optLogs) {
+  var d = DAYS[di];
+  var exercises = [];
+  d.supersets.forEach(function(ss, si) {
+    ss.exercises.forEach(function(ex, ei) {
+      var sl = logs[makeKey(di, si, ei)] || [];
+      var filled = sl.filter(function(s) { return s.weight || s.reps; });
+      if (!filled.length) return;
+      var totalVol = filled.reduce(function(a, s) { return a + (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0); }, 0);
+      exercises.push({
+        name: ex.name,
+        muscles: ex.muscles,
+        sets: filled.map(function(s, idx) { return { set: idx + 1, weight: s.weight, reps: s.reps }; }),
+        completed: isComplete(sl),
+        totalVolume: totalVol,
+      });
+    });
+  });
+  if (optLogs) {
+    var swings = (optLogs[di + "-swings"] || []).filter(function(s) { return s.weight || s.reps; });
+    if (swings.length) {
+      exercises.push({
+        name: "Kettlebell Swing (Bonus)", muscles: ["Glutes (Primary)", "Hamstrings", "Core"],
+        sets: swings.map(function(s, i) { return { set: i + 1, weight: s.weight, reps: s.reps }; }),
+        completed: swings.every(function(s) { return s.weight && s.reps; }),
+        totalVolume: swings.reduce(function(a, s) { return a + (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0); }, 0),
+      });
+    }
+    if (twists.length) {
+      exercises.push({
+        name: "DB Russian Twist (Bonus)", muscles: ["Obliques (Primary)", "Rectus Abdominis", "Hip Flexors"],
+        sets: twists.map(function(s, i) { return { set: i + 1, weight: s.weight, reps: s.reps }; }),
+        completed: twists.every(function(s) { return s.weight && s.reps; }),
+        totalVolume: twists.reduce(function(a, s) { return a + (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0); }, 0),
+      });
+    }
+    if (planks.length) {
+      exercises.push({
+        name: "Forearm Plank (Bonus)", muscles: ["Core Stabilizers", "Obliques"], isPlank: true,
+        sets: planks.map(function(s, i) { return { set: i + 1, weight: "", reps: s.time + "s hold" }; }),
+        completed: planks.every(function(s) { return s.time; }),
+        totalVolume: 0,
+        totalTime: planks.reduce(function(a, s) { return a + (parseInt(s.time) || 0); }, 0),
+      });
+    }
+  }
+  if (!exercises.length) return null;
+  return {
+    date: todayLabel(), dateKey: todayISO(),
+    dayName: d.day, focus: d.focus, tag: d.tag, color: d.color,
+    exercises: exercises,
+    totalVolume: exercises.reduce(function(a, e) { return a + e.totalVolume; }, 0),
+  };
+}
+
+function saveSessionToHistory(logs, dayIndex, optLogs, notes) {
+  var session = buildSession(logs, dayIndex, optLogs);
+  if (!session) return;
+  // Attach any session note
+  if (notes) {
+    var noteKey = todayISO() + "-" + dayIndex;
+    var note = notes[noteKey];
+    if (note) session.note = note;
+  }
+  var existing = lsGet(LS_HISTORY) || [];
+  var idx = -1;
+  for (var i = 0; i < existing.length; i++) {
+    if (existing[i].dateKey === session.dateKey && existing[i].dayName === session.dayName) { idx = i; break; }
+  }
+  if (idx >= 0) {
+    var prevEx = JSON.stringify(existing[idx].exercises);
+    var prevNote = existing[idx].note || "";
+    if (prevEx === JSON.stringify(session.exercises) && prevNote === (session.note || "")) return;
+    existing[idx] = session;
+  } else {
+    existing.unshift(session);
+  }
+  lsSet(LS_HISTORY, existing);
+}
+
+// ---- HISTORY PANEL ----
+function HistoryPanel(props) {
+  var onClose = props.onClose;
+  var isDark = props.isDark;
+  var history = lsGet(LS_HISTORY) || [];
+  var sorted = history.slice().sort(function(a, b) { return b.dateKey.localeCompare(a.dateKey); }).map(function(s) {
+    var dayData = null;
+    for (var i = 0; i < DAYS.length; i++) { if (DAYS[i].day === s.dayName) { dayData = DAYS[i]; break; } }
+    return Object.assign({}, s, { color: s.color || (dayData ? dayData.color : "#888") });
+  });
+
+  var bg = isDark ? "rgba(0,0,0,0.93)" : "rgba(244,244,244,0.97)";
+  var cardBg = isDark ? "#0e0e0e" : "#fff";
+  var borderCol = isDark ? "#1e1e1e" : "#ddd";
+  var textMain = isDark ? "#eee" : "#111";
+  var textSub = isDark ? "#999" : "#555";
+
+  var [selected, setSelected] = useState(null);
+  var [confirmDel, setConfirmDel] = useState(null);
+  var [editDateIdx, setEditDateIdx] = useState(null);
+  var [editDateVal, setEditDateVal] = useState("");
+  var [editSet, setEditSet] = useState(null);
+  var [editSetVal, setEditSetVal] = useState("");
+  var [localHistory, setLocalHistory] = useState(sorted);
+
+  function deleteEntry(i) {
+    var t = localHistory[i];
+    var updated = (lsGet(LS_HISTORY) || []).filter(function(h) { return !(h.dateKey === t.dateKey && h.dayName === t.dayName); });
+    lsSet(LS_HISTORY, updated);
+    var newSorted = updated.slice().sort(function(a, b) { return b.dateKey.localeCompare(a.dateKey); }).map(function(s) {
+      var dayData = null;
+      for (var j = 0; j < DAYS.length; j++) { if (DAYS[j].day === s.dayName) { dayData = DAYS[j]; break; } }
+      return Object.assign({}, s, { color: s.color || (dayData ? dayData.color : "#888") });
+    });
+    setLocalHistory(newSorted);
+    setSelected(null); setConfirmDel(null);
+  }
+
+  function saveDate(i) {
+    if (!editDateVal) { setEditDateIdx(null); return; }
+    var d = new Date(editDateVal + "T12:00:00");
+    var label = d.toLocaleDateString("en-US", { weekday:"long", year:"numeric", month:"long", day:"numeric" });
+    var t = localHistory[i];
+    var allHistory = lsGet(LS_HISTORY) || [];
+    var updated = allHistory.map(function(h) {
+      if (h.dateKey === t.dateKey && h.dayName === t.dayName) return Object.assign({}, h, { dateKey: editDateVal, date: label });
+      return h;
+    });
+    lsSet(LS_HISTORY, updated);
+    var newSorted = updated.slice().sort(function(a, b) { return b.dateKey.localeCompare(a.dateKey); }).map(function(s) {
+      var dayData = null;
+      for (var j = 0; j < DAYS.length; j++) { if (DAYS[j].day === s.dayName) { dayData = DAYS[j]; break; } }
+      return Object.assign({}, s, { color: s.color || (dayData ? dayData.color : "#888") });
+    });
+    setLocalHistory(newSorted);
+    setEditDateIdx(null);
+  }
+
+  function saveSetEdit(sessionIdx) {
+    if (!editSet) return;
+    var t = localHistory[sessionIdx];
+    var allHistory = lsGet(LS_HISTORY) || [];
+    var updated = allHistory.map(function(h) {
+      if (h.dateKey !== t.dateKey || h.dayName !== t.dayName) return h;
+      var exercises = h.exercises.map(function(ex, ei) {
+        if (ei !== editSet.exIdx) return ex;
+        var sets = ex.sets.map(function(st, si) {
+          if (si !== editSet.setIdx) return st;
+          var updated2 = Object.assign({}, st);
+          updated2[editSet.field] = editSetVal;
+          return updated2;
+        });
+        var totalVolume = sets.reduce(function(a, s) { return a + (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0); }, 0);
+        return Object.assign({}, ex, { sets: sets, totalVolume: totalVolume });
+      });
+      var totalVolume = exercises.reduce(function(a, e) { return a + e.totalVolume; }, 0);
+      return Object.assign({}, h, { exercises: exercises, totalVolume: totalVolume });
+    });
+    lsSet(LS_HISTORY, updated);
+    var newSorted = updated.slice().sort(function(a, b) { return b.dateKey.localeCompare(a.dateKey); }).map(function(s) {
+      var dayData = null;
+      for (var j = 0; j < DAYS.length; j++) { if (DAYS[j].day === s.dayName) { dayData = DAYS[j]; break; } }
+      return Object.assign({}, s, { color: s.color || (dayData ? dayData.color : "#888") });
+    });
+    setLocalHistory(newSorted);
+    setEditSet(null);
+  }
+
+  var inp = { background: isDark ? "#0d0d0d" : "#f0f0f0", border: "1px solid " + (isDark ? "#333" : "#ccc"), borderRadius: 4, color: textMain, fontFamily: "monospace", fontSize: 12, padding: "3px 6px", outline: "none", width: "100%", textAlign: "center" };
+
+  return (
+    <div style={{ position:"fixed", inset:0, background:bg, zIndex:1000, overflowY:"auto" }}>
+      <div style={{ maxWidth:660, margin:"0 auto", padding:"24px 20px 60px" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28 }}>
+          <div style={{ flex:1 }}>
+            <div style={{ fontFamily:"sans-serif", fontSize:28, fontWeight:900, letterSpacing:"0.04em", color:textMain, lineHeight:1 }}>SESSION HISTORY</div>
+            <div style={{ fontFamily:"monospace", fontSize:10, color:textSub, marginTop:4 }}>{localHistory.length} SESSION{localHistory.length !== 1 ? "S" : ""} LOGGED</div>
+          </div>
+          <button onClick={onClose} style={{ background:cardBg, border:"1px solid "+borderCol, borderRadius:6, color:textSub, fontFamily:"monospace", fontSize:10, padding:"8px 14px", cursor:"pointer" }}>X CLOSE</button>
+        </div>
+        {!localHistory.length && (
+          <div style={{ textAlign:"center", padding:"60px 20px", color:textSub, fontFamily:"monospace", fontSize:12 }}>NO SESSIONS YET. COMPLETE A WORKOUT TO SEE IT HERE.</div>
+        )}
+        {localHistory.map(function(s, i) {
+          return (
+            <div key={s.dateKey + s.dayName} style={{ background:cardBg, border:"1px solid " + (confirmDel===i ? "#E8453C66" : selected===i ? s.color+"66" : borderCol), borderLeft:"3px solid " + (confirmDel===i ? "#E8453C" : s.color), borderRadius:8, marginBottom:10, overflow:"hidden" }}>
+              <div style={{ display:"flex", alignItems:"center", padding:"14px 16px", gap:12, flexWrap:"wrap" }}>
+                <div style={{ flex:1, minWidth:180 }}>
+                  <div style={{ fontFamily:"monospace", fontSize:9, color:s.color, letterSpacing:"0.12em", marginBottom:3, cursor:"pointer" }} onClick={function() { setSelected(selected===i?null:i); setConfirmDel(null); }}>{s.tag}</div>
+                  <div style={{ fontWeight:700, fontSize:15, color:textMain, marginBottom:4, cursor:"pointer" }} onClick={function() { setSelected(selected===i?null:i); setConfirmDel(null); }}>{s.focus}</div>
+                  {editDateIdx === i ? (
+                    <div style={{ display:"flex", gap:6, alignItems:"center" }} onClick={function(e) { e.stopPropagation(); }}>
+                      <input type="date" value={editDateVal}
+                        onChange={function(e) { setEditDateVal(e.target.value); }}
+                        style={Object.assign({}, inp, { width:"auto", flex:1 })} />
+                      <button onClick={function(e) { e.stopPropagation(); saveDate(i); }}
+                        style={{ background:s.color, border:"none", borderRadius:4, color:"#fff", fontFamily:"monospace", fontSize:9, padding:"4px 8px", cursor:"pointer", fontWeight:700 }}>SAVE</button>
+                      <button onClick={function(e) { e.stopPropagation(); setEditDateIdx(null); }}
+                        style={{ background:"transparent", border:"1px solid #333", borderRadius:4, color:textSub, fontFamily:"monospace", fontSize:9, padding:"4px 8px", cursor:"pointer" }}>X</button>
+                    </div>
+                  ) : (
+                    <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                      <span style={{ fontFamily:"monospace", fontSize:10, color:textSub }}>{s.date}</span>
+                      <button onClick={function(e) { e.stopPropagation(); setEditDateIdx(i); setEditDateVal(s.dateKey); }}
+                        style={{ background:"transparent", border:"1px solid "+borderCol, borderRadius:3, color:textSub, fontFamily:"monospace", fontSize:9, padding:"2px 6px", cursor:"pointer" }}>EDIT DATE</button>
+                    </div>
+                  )}
+                </div>
+                <div style={{ display:"flex", gap:12, alignItems:"center" }}>
+                  <div style={{ textAlign:"center", cursor:"pointer" }} onClick={function() { setSelected(selected===i?null:i); setConfirmDel(null); }}>
+                    <div style={{ fontFamily:"monospace", fontSize:10, color:textSub }}>EXERCISES</div>
+                    <div style={{ fontFamily:"monospace", fontSize:16, color:s.color, fontWeight:700 }}>{s.exercises.length}</div>
+                  </div>
+                  <div style={{ textAlign:"center", cursor:"pointer" }} onClick={function() { setSelected(selected===i?null:i); setConfirmDel(null); }}>
+                    <div style={{ fontFamily:"monospace", fontSize:10, color:textSub }}>VOLUME</div>
+                    <div style={{ fontFamily:"monospace", fontSize:16, color:s.color, fontWeight:700 }}>{s.totalVolume.toLocaleString()}<span style={{ fontSize:10 }}> lbs</span></div>
+                  </div>
+                  <div style={{ color:textSub, fontSize:18, cursor:"pointer" }} onClick={function() { setSelected(selected===i?null:i); setConfirmDel(null); }}>{selected===i?"−":"+"}</div>
+                  {confirmDel === i ? (
+                    <div style={{ display:"flex", gap:6 }}>
+                      <button onClick={function() { deleteEntry(i); }} style={{ background:"#E8453C", border:"none", borderRadius:5, color:"#fff", fontFamily:"monospace", fontSize:10, fontWeight:700, padding:"5px 10px", cursor:"pointer" }}>DELETE</button>
+                      <button onClick={function() { setConfirmDel(null); }} style={{ background:"transparent", border:"1px solid #333", borderRadius:5, color:textSub, fontFamily:"monospace", fontSize:10, padding:"5px 10px", cursor:"pointer" }}>CANCEL</button>
+                    </div>
+                  ) : (
+                    <button onClick={function(e) { e.stopPropagation(); setConfirmDel(i); setSelected(null); }} style={{ background:"transparent", border:"1px solid "+borderCol, borderRadius:5, color:textSub, fontFamily:"monospace", fontSize:11, padding:"5px 8px", cursor:"pointer" }}>DEL</button>
+                  )}
+                </div>
+              </div>
+              {confirmDel === i && (
+                <div style={{ background: isDark ? "#1a0a0a" : "#fff0f0", borderTop:"1px solid #E8453C33", padding:"10px 16px" }}>
+                  <span style={{ fontFamily:"monospace", fontSize:10, color:"#E8453C" }}>DELETE THIS SESSION? THIS CANNOT BE UNDONE.</span>
+                </div>
+              )}
+              {selected === i && (
+                <div style={{ borderTop:"1px solid "+borderCol, padding:16 }}>
+                  {s.note && (
+                    <div style={{ background: isDark ? "#111" : "#f5f5f5", border:"1px solid "+s.color+"33", borderLeft:"3px solid "+s.color, borderRadius:6, padding:"10px 14px", marginBottom:14 }}>
+                      <div style={{ fontFamily:"monospace", fontSize:9, color:s.color, marginBottom:4 }}>SESSION NOTES</div>
+                      <div style={{ fontSize:13, color:textMain, lineHeight:1.6, whiteSpace:"pre-wrap" }}>{s.note}</div>
+                    </div>
+                  )}
+                  <div style={{ fontFamily:"monospace", fontSize:9, color:textSub, marginBottom:12 }}>TAP ANY VALUE TO EDIT</div>
+                    return (
+                      <div key={exIdx} style={{ marginBottom:14, paddingBottom:14, borderBottom: exIdx < s.exercises.length-1 ? "1px solid "+borderCol : "none" }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                          {ex.completed && <span style={{ color:"#22c55e", fontSize:13 }}>✓</span>}
+                          <span style={{ fontWeight:600, fontSize:14, color:textMain }}>{ex.name}</span>
+                          <span style={{ fontFamily:"monospace", fontSize:9, color:textSub, marginLeft:"auto" }}>VOL: {ex.totalVolume.toLocaleString()} lbs</span>
+                        </div>
+                        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(100px,1fr))", gap:6 }}>
+                          {ex.sets.map(function(st, setIdx) {
+                            var isEditW = editSet && editSet.si===i && editSet.exIdx===exIdx && editSet.setIdx===setIdx && editSet.field==="weight";
+                            var isEditR = editSet && editSet.si===i && editSet.exIdx===exIdx && editSet.setIdx===setIdx && editSet.field==="reps";
+                            return (
+                              <div key={setIdx} style={{ background: isDark ? "#111" : "#f5f5f5", border:"1px solid "+s.color+"22", borderRadius:5, padding:"6px 8px", textAlign:"center" }}>
+                                <div style={{ fontFamily:"monospace", fontSize:9, color:textSub, marginBottom:4 }}>SET {st.set}</div>
+                                {isEditW ? (
+                                  <input autoFocus type="number" value={editSetVal} onChange={function(e) { setEditSetVal(e.target.value); }}
+                                    onBlur={function() { saveSetEdit(i); }} onKeyDown={function(e) { if (e.key==="Enter") saveSetEdit(i); if (e.key==="Escape") setEditSet(null); }}
+                                    style={Object.assign({}, inp, { fontSize:13, marginBottom:4 })} />
+                                ) : (
+                                  <div onClick={function() { setEditSet({si:i,exIdx:exIdx,setIdx:setIdx,field:"weight"}); setEditSetVal(st.weight); }}
+                                    style={{ fontFamily:"monospace", fontSize:13, color:textMain, fontWeight:700, marginBottom:2, cursor:"pointer" }}>
+                                    {st.weight || "-"}<span style={{ fontSize:9, color:textSub }}> lbs</span>
+                                  </div>
+                                )}
+                                {isEditR ? (
+                                  <input autoFocus type="number" value={editSetVal} onChange={function(e) { setEditSetVal(e.target.value); }}
+                                    onBlur={function() { saveSetEdit(i); }} onKeyDown={function(e) { if (e.key==="Enter") saveSetEdit(i); if (e.key==="Escape") setEditSet(null); }}
+                                    style={inp} />
+                                ) : (
+                                  <div onClick={function() { setEditSet({si:i,exIdx:exIdx,setIdx:setIdx,field:"reps"}); setEditSetVal(st.reps); }}
+                                    style={{ fontFamily:"monospace", fontSize:11, color:s.color, cursor:"pointer" }}>
+                                    {st.reps || "-"}<span style={{ fontSize:9, color:textSub }}> reps</span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ---- PR BOARD ----
+function PRBoard(props) {
+  var onClose = props.onClose;
+  var isDark = props.isDark;
+  var prs = getPRs();
+  var entries = Object.entries(prs).sort(function(a, b) { return b[1].date.localeCompare(a[1].date); });
+  var bg = isDark ? "rgba(0,0,0,0.93)" : "rgba(244,244,244,0.97)";
+  var cardBg = isDark ? "#0e0e0e" : "#fff";
+  var borderCol = isDark ? "#1e1e1e" : "#ddd";
+  var textMain = isDark ? "#eee" : "#111";
+  var textSub = isDark ? "#999" : "#555";
+
+  return (
+    <div style={{ position:"fixed", inset:0, background:bg, zIndex:1001, overflowY:"auto" }}>
+      <div style={{ maxWidth:660, margin:"0 auto", padding:"24px 20px 60px" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:28 }}>
+          <div style={{ flex:1 }}>
+            <div style={{ fontFamily:"sans-serif", fontSize:28, fontWeight:900, color:textMain, lineHeight:1 }}>PERSONAL RECORDS</div>
+            <div style={{ fontFamily:"monospace", fontSize:10, color:textSub, marginTop:4 }}>{entries.length} EXERCISE{entries.length!==1?"S":""} TRACKED</div>
+          </div>
+          <button onClick={onClose} style={{ background:cardBg, border:"1px solid "+borderCol, borderRadius:6, color:textSub, fontFamily:"monospace", fontSize:10, padding:"8px 14px", cursor:"pointer" }}>X CLOSE</button>
+        </div>
+        {!entries.length && <div style={{ textAlign:"center", padding:"60px 20px", color:textSub, fontFamily:"monospace", fontSize:12 }}>NO PRs YET. LOG WORKOUTS TO TRACK YOUR BESTS.</div>}
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:10 }}>
+          {entries.map(function(entry) {
+            var name = entry[0]; var pr = entry[1];
+            return (
+              <div key={name} style={{ background:cardBg, border:"1px solid #F5A62344", borderLeft:"3px solid #F5A623", borderRadius:8, padding:"12px 16px" }}>
+                <div style={{ fontFamily:"monospace", fontSize:9, color:"#F5A623", marginBottom:4 }}>PERSONAL BEST</div>
+                <div style={{ fontWeight:700, fontSize:14, color:textMain, marginBottom:8 }}>{name}</div>
+                <div style={{ display:"flex", gap:12 }}>
+                  <div>
+                    <div style={{ fontFamily:"monospace", fontSize:9, color:textSub, marginBottom:2 }}>WEIGHT x REPS</div>
+                    <div style={{ fontFamily:"monospace", fontSize:14, color:"#F5A623", fontWeight:700 }}>{pr.weight} x {pr.reps}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontFamily:"monospace", fontSize:9, color:textSub, marginBottom:2 }}>EST. 1RM</div>
+                    <div style={{ fontFamily:"monospace", fontSize:14, color:"#F5A623", fontWeight:700 }}>{pr.est1RM} lbs</div>
+                  </div>
+                  <div style={{ marginLeft:"auto", textAlign:"right" }}>
+                    <div style={{ fontFamily:"monospace", fontSize:9, color:textSub, marginBottom:2 }}>DATE</div>
+                    <div style={{ fontFamily:"monospace", fontSize:10, color:textSub }}>{pr.date}</div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---- RECOVERY HEATMAP ----
+function RecoveryHeatmap(props) {
+  var isDark = props.isDark;
+  var liveLogs = props.liveLogs || {};
+  var cardBg = isDark ? "#111" : "#ebebeb";
+  var borderCol = isDark ? "#1e1e1e" : "#ddd";
+  var textMain = isDark ? "#eee" : "#111";
+  var textSub = isDark ? "#999" : "#555";
+
+  // Build recovery from history AND merge live logs for today
+  var muscleMap = {
+    "Chest":      ["Chest", "Upper Chest", "Lower Chest", "Inner Chest"],
+    "Triceps":    ["Triceps"],
+    "Shoulders":  ["Deltoid", "Anterior", "Medial"],
+    "Back":       ["Lats", "Rhomboids", "Teres", "Serratus", "Mid-Back", "Erector"],
+    "Biceps":     ["Biceps", "Brachialis", "Brachioradialis"],
+    "Core":       ["Obliques", "Rectus Abdominis", "Core", "Abs"],
+    "Quads":      ["Quads"],
+    "Hamstrings": ["Hamstrings"],
+    "Glutes":     ["Glutes"],
+    "Forearms":   ["Forearms"],
+  };
+
+  var history = lsGet(LS_HISTORY) || [];
+  var now = new Date();
+  var todayStr = todayISO();
+
+  // Build a merged list: committed history + any live data logged today
+  var liveExercises = [];
+  DAYS.forEach(function(day, di) {
+    day.supersets.forEach(function(ss, si) {
+      ss.exercises.forEach(function(ex, ei) {
+        var key = makeKey(di, si, ei);
+        var sl = liveLogs[key] || [];
+        var hasData = sl.some(function(s) { return s.weight || s.reps; });
+        if (hasData) {
+          liveExercises.push({ muscles: ex.muscles });
+        }
+      });
+    });
+  });
+
+  var recovery = {};
+  Object.keys(muscleMap).forEach(function(muscle) {
+    var mostRecent = null;
+
+    // Check committed history
+    history.forEach(function(session) {
+      (session.exercises || []).forEach(function(ex) {
+        var match = (ex.muscles || []).some(function(m) {
+          return muscleMap[muscle].some(function(k) { return m.indexOf(k) !== -1; });
+        });
+        if (match) {
+          var d = new Date(session.dateKey + "T12:00:00");
+          if (!mostRecent || d > mostRecent) mostRecent = d;
+        }
+      });
+    });
+
+    // Check live logs (today's unsaved data) — treat as trained right now
+    var trainedLiveToday = liveExercises.some(function(ex) {
+      return (ex.muscles || []).some(function(m) {
+        return muscleMap[muscle].some(function(k) { return m.indexOf(k) !== -1; });
+      });
+    });
+    if (trainedLiveToday) {
+      mostRecent = now; // just trained
+    }
+
+    if (!mostRecent) { recovery[muscle] = null; return; }
+    recovery[muscle] = Math.max(0, Math.round((now - mostRecent) / (1000 * 60 * 60)));
+  });
+
+  function getStatus(hours) {
+    if (hours === null) return { label:"Not yet trained", color:"#555", bg: isDark ? "#1a1a1a" : "#e0e0e0", bar:"0%" };
+    if (hours < 24)  return { label:hours+"h ago  -  Recovering", color:"#E8453C", bg:"#E8453C18", bar:Math.round((hours/24)*100)+"%" };
+    if (hours < 48)  return { label:hours+"h ago  -  Resting",    color:"#F5A623", bg:"#F5A62318", bar:Math.round(((hours-24)/24)*100)+"%" };
+    return             { label:hours+"h ago  -  Ready",            color:"#22c55e", bg:"#22c55e18", bar:"100%" };
+  }
+
+  return (
+    <div style={{ marginTop:16, background:cardBg, border:"1px solid "+borderCol, borderRadius:8, padding:16 }}>
+      <div style={{ fontFamily:"monospace", fontSize:10, color:textSub, letterSpacing:"0.12em", marginBottom:12 }}>MUSCLE RECOVERY STATUS</div>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))", gap:8 }}>
+        {Object.keys(muscleMap).map(function(muscle) {
+          var hours = recovery[muscle];
+          var st = getStatus(hours);
+          return (
+            <div key={muscle} style={{ background:st.bg, border:"1px solid "+st.color+"33", borderRadius:6, padding:"8px 10px" }}>
+              <div style={{ fontSize:12, fontWeight:700, color:textMain, marginBottom:3 }}>{muscle}</div>
+              <div style={{ fontFamily:"monospace", fontSize:9, color:st.color, marginBottom:5 }}>{st.label}</div>
+              <div style={{ height:3, borderRadius:2, background: isDark ? "#222" : "#ccc" }}>
+                <div style={{ height:"100%", borderRadius:2, background:st.color, width:st.bar }}/>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display:"flex", gap:16, marginTop:12, flexWrap:"wrap" }}>
+        {[["#E8453C","< 24h  Recovering"],["#F5A623","24-48h  Resting"],["#22c55e","48h+  Ready"]].map(function(pair) {
+          return (
+            <div key={pair[0]} style={{ display:"flex", alignItems:"center", gap:6 }}>
+              <div style={{ width:10, height:10, borderRadius:2, background:pair[0] }}/>
+              <span style={{ fontFamily:"monospace", fontSize:9, color:textSub }}>{pair[1]}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ---- AUDIO & REST TIMER ----
+function getAudioCtx() {
+  if (!window._audioCtx) {
+    window._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return window._audioCtx;
+}
+
+function speakNumber(n) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(String(n));
+  u.rate = 1.1; u.pitch = 1; u.volume = 1;
+  window.speechSynthesis.speak(u);
+}
+
+function ringBell(ctx) {
+  var now = ctx.currentTime;
+  [[440,1],[880,0.5],[1320,0.3],[1760,0.15]].forEach(function(pair) {
+    var freq = pair[0]; var gain = pair[1];
+    var osc = ctx.createOscillator();
+    var env = ctx.createGain();
+    osc.connect(env); env.connect(ctx.destination);
+    osc.type = "sine"; osc.frequency.setValueAtTime(freq, now);
+    env.gain.setValueAtTime(gain, now);
+    env.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+    osc.start(now); osc.stop(now + 2.5);
+  });
+}
+
+function RestTimer(props) {
+  var color = props.color;
+  var isDark = props.isDark;
+  var [total, setTotal] = useState(0);
+  var [remaining, setRemaining] = useState(0);
+  var [running, setRunning] = useState(false);
+  var [visible, setVisible] = useState(false);
+  var [done, setDone] = useState(false);
+  var intervalRef = useRef(null);
+  var bellRef = useRef(null);
+  var spokenRef = useRef({});
+  var R = 10; var CIRC = 2 * Math.PI * R;
+
+  function stopBell() { clearInterval(bellRef.current); bellRef.current = null; }
+
+  function start(secs) {
+    var ctx = getAudioCtx();
+    if (ctx.state === "suspended") ctx.resume();
+    clearInterval(intervalRef.current);
+    stopBell();
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    spokenRef.current = {};
+    setTotal(secs); setRemaining(secs); setRunning(true); setVisible(true); setDone(false);
+  }
+
+  function cancel() {
+    clearInterval(intervalRef.current);
+    stopBell();
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    setRunning(false); setDone(false); setTotal(0); setRemaining(0); setVisible(false);
+  }
+
+  useEffect(function() {
+    if (!running) return;
+    intervalRef.current = setInterval(function() {
+      setRemaining(function(prev) {
+        var next = prev - 1;
+        if (next >= 1 && next <= 5 && !spokenRef.current[next]) {
+          spokenRef.current[next] = true;
+          speakNumber(next);
+        }
+        if (next <= 0) {
+          clearInterval(intervalRef.current);
+          setRunning(false); setDone(true);
+          var ctx = getAudioCtx();
+          ringBell(ctx);
+          bellRef.current = setInterval(function() { ringBell(ctx); }, 2600);
+          setTimeout(function() { speakNumber("Go"); }, 400);
+          return 0;
+        }
+        return next;
+      });
+    }, 1000);
+    return function() { clearInterval(intervalRef.current); };
+  }, [running]);
+
+  useEffect(function() { return function() { stopBell(); }; }, []);
+
+  var accentColor = done ? "#22c55e" : color;
+  var isCountdown = remaining <= 5 && remaining > 0 && running;
+  var dash = CIRC * (total > 0 ? remaining / total : 1);
+  var pillBorder = done ? "#22c55e88" : isCountdown ? "#ff6b0088" : visible ? accentColor + "55" : (isDark ? "#252525" : "#ccc");
+  var pillShadow = done ? "0 4px 28px #22c55e44" : isCountdown ? "0 4px 28px #ff6b0066" : visible ? "0 4px 28px " + accentColor + "33" : "0 4px 16px rgba(0,0,0,0.3)";
+
+  return (
+    <div style={{ position:"fixed", bottom:20, left:"50%", transform:"translateX(-50%)", zIndex:500, display:"flex", alignItems:"center", background: isDark ? "#111" : "#f0f0f0", border:"1px solid "+pillBorder, borderRadius:40, padding:"8px 12px", boxShadow:pillShadow, transition:"border-color .3s, box-shadow .3s" }}>
+      <span style={{ fontFamily:"monospace", fontSize:9, color: isDark ? "#505050" : "#999", letterSpacing:"0.12em", marginRight:10, userSelect:"none" }}>REST</span>
+      {[30,60,90].map(function(s) {
+        var active = visible && total === s;
+        return (
+          <button key={s} onClick={function() { start(s); }} style={{ background: active ? accentColor : "transparent", border:"1px solid "+(active ? accentColor : (isDark?"#2a2a2a":"#ccc")), borderRadius:20, color: active ? "#fff" : (isDark?"#6e6e6e":"#888"), fontFamily:"monospace", fontSize:11, fontWeight:700, padding:"5px 12px", cursor:"pointer", marginRight:4 }}>
+            :{s < 10 ? "0" + s : s === 30 ? "30" : s === 60 ? "60" : "90"}
+          </button>
+        );
+      })}
+      {visible && (
+        <div style={{ display:"flex", alignItems:"center", gap:8, marginLeft:6 }}>
+          <svg width={26} height={26} style={{ transform:"rotate(-90deg)", flexShrink:0 }}>
+            <circle cx={13} cy={13} r={R} fill="none" stroke={isDark?"#222":"#ddd"} strokeWidth={2.5}/>
+            <circle cx={13} cy={13} r={R} fill="none" stroke={accentColor} strokeWidth={2.5} strokeDasharray={dash + " " + CIRC} strokeLinecap="round" style={{ transition:"stroke-dasharray .95s linear" }}/>
+          </svg>
+          <span style={{ fontFamily:"monospace", fontWeight:700, textAlign:"center", minWidth:26, fontSize: isCountdown ? 22 : 16, color: done ? "#22c55e" : isCountdown ? "#ff9500" : accentColor }}>
+            {done ? "✓" : remaining}
+          </span>
+          {done && <span style={{ fontFamily:"monospace", fontSize:9, color:"#22c55e" }}>GO!</span>}
+          <button onClick={cancel} style={{ background:"transparent", border:"1px solid "+(isDark?"#2a2a2a":"#ccc"), borderRadius:20, color: done ? "#22c55e" : (isDark?"#505050":"#888"), fontFamily:"monospace", fontSize:9, padding:"3px 8px", cursor:"pointer", marginLeft:2, fontWeight: done ? 700 : 400 }}>{done ? "RESET" : "X"}</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---- MAIN ----
+export default function WorkoutRoutine() {
+  var [activeDay, setActiveDay]     = useState(0);
+  var [expandedEx, setExpandedEx]   = useState(null);
+  var [logs, setLogs]               = useState(function() { return lsGet(LS_LOGS) || {}; });
+  var [optLogs, setOptLogs]         = useState(function() { return lsGet(LS_OPTIONAL) || {}; });
+  var [notes, setNotes]             = useState(function() { return lsGet(LS_NOTES) || {}; });
+  var [showHistory, setShowHistory] = useState(false);
+  var [showPRs, setShowPRs]         = useState(false);
+  var [saveFlash, setSaveFlash]     = useState(false);
+  var [optExpanded, setOptExpanded] = useState(false);
+  var [notesExpanded, setNotesExpanded] = useState(false);
+  var [isDark, setIsDark]           = useState(function() { return lsGet(LS_THEME) !== "light"; });
+  var [newPR, setNewPR]             = useState(null);
+  var [timerElapsed, setTimerElapsed] = useState(0);
+  var [timerRunning, setTimerRunning] = useState(false);
+  var timerStart    = useRef(null);
+  var timerInterval = useRef(null);
+  var logsRef       = useRef(logs);
+  var optLogsRef    = useRef(optLogs);
+  var prevDayRef    = useRef(0);
+  var firstRender   = useRef(true);
+
+  var streak       = getStreak();
+  var historyCount = (lsGet(LS_HISTORY) || []).length;
+  var day          = DAYS[activeDay];
+
+  // Theme colors
+  var T = {
+    bg:        isDark ? "#0a0a0a" : "#f4f4f4",
+    card:      isDark ? "#0e0e0e" : "#ffffff",
+    section:   isDark ? "#111111" : "#ebebeb",
+    border:    isDark ? "#1d1d1d" : "#dcdcdc",
+    borderMid: isDark ? "#2a2a2a" : "#cccccc",
+    text:      isDark ? "#f0f0f0" : "#111111",
+    sub:       isDark ? "#c0c0c0" : "#444444",
+    muted:     isDark ? "#6e6e6e" : "#888888",
+    faint:     isDark ? "#444444" : "#aaaaaa",
+    input:     isDark ? "#0d0d0d" : "#f9f9f9",
+  };
+
+  // Duration timer
+  function timerStart2() {
+    if (timerRunning) return;
+    timerStart.current = Date.now() - timerElapsed * 1000;
+    setTimerRunning(true);
+    timerInterval.current = setInterval(function() {
+      setTimerElapsed(Math.floor((Date.now() - timerStart.current) / 1000));
+    }, 1000);
+  }
+  function timerPause() { clearInterval(timerInterval.current); setTimerRunning(false); }
+  function timerReset() { clearInterval(timerInterval.current); setTimerRunning(false); setTimerElapsed(0); timerStart.current = null; }
+  useEffect(function() { return function() { clearInterval(timerInterval.current); }; }, []);
+  var timerMins = Math.floor(timerElapsed / 60);
+  var timerSecs = timerElapsed % 60;
+  var timerDisplay = (timerMins < 10 ? "0" : "") + timerMins + ":" + (timerSecs < 10 ? "0" : "") + timerSecs;
+  var timerOver = timerMins >= 60;
+
+  useEffect(function() { logsRef.current = logs; }, [logs]);
+  useEffect(function() { optLogsRef.current = optLogs; }, [optLogs]);
+
+  // Track which day indices have unsaved changes - populated ONLY by user actions, never on mount
+  var dirtyDays = useRef({});
+  var isMount = useRef(true);
+
+  // Show saved flash indicator when logs change (actual saves happen in updateLog/updateOptLog)
+  useEffect(function() {
+    if (isMount.current) return;
+    setSaveFlash(true);
+    var t = setTimeout(function() { setSaveFlash(false); }, 1500);
+    return function() { clearTimeout(t); };
+  }, [logs, optLogs]);
+
+  useEffect(function() {
+    if (isMount.current) return;
+    lsSet(LS_NOTES, notes);
+  }, [notes]);
+
+  // Mark mount complete
+  useEffect(function() {
+    isMount.current = false;
+  }, []);
+
+  var notesRef = useRef(notes);
+  useEffect(function() { notesRef.current = notes; }, [notes]);
+
+  // On day switch: save ONLY if this day was genuinely dirtied by user input
+  useEffect(function() {
+    if (firstRender.current) { firstRender.current = false; prevDayRef.current = activeDay; return; }
+    var leaving = prevDayRef.current;
+    if (dirtyDays.current[leaving]) {
+      saveSessionToHistory(logsRef.current, leaving, optLogsRef.current, notesRef.current);
+      delete dirtyDays.current[leaving];
+    }
+    prevDayRef.current = activeDay;
+    timerReset();
+  }, [activeDay]);
+
+  // On close: save only days the user actually modified this session
+  useEffect(function() {
+    function handler() {
+      var dirty = dirtyDays.current;
+      Object.keys(dirty).forEach(function(di) {
+        saveSessionToHistory(logsRef.current, parseInt(di), optLogsRef.current, notesRef.current);
+      });
+    }
+    window.addEventListener("beforeunload", handler);
+    return function() { window.removeEventListener("beforeunload", handler); };
+  }, []);
+
+  // PR auto-dismiss
+  useEffect(function() {
+    if (!newPR) return;
+    var t = setTimeout(function() { setNewPR(null); }, 4000);
+    return function() { clearTimeout(t); };
+  }, [newPR]);
+
+  function updateLog(key, setIdx, field, value, exName) {
+    if (!timerRunning && value) timerStart2();
+    dirtyDays.current[activeDay] = true;
+    // Build next state synchronously
+    var prev = logsRef.current;
+    var cur = prev[key] || Array.from({ length: 3 }, function() { return { weight: "", reps: "" }; });
+    var nextKey = cur.map(function(s, i) { return i === setIdx ? Object.assign({}, s, { [field]: value }) : s; });
+    var next = Object.assign({}, prev, { [key]: nextKey });
+    // Persist BEFORE setState so data is never lost
+    lsSet(LS_LOGS, next);
+    logsRef.current = next;
+    if (exName && field === "reps" && value && next[key][setIdx].weight) {
+      if (checkAndUpdatePR(exName, next[key][setIdx].weight, value)) setNewPR(exName);
+    }
+    setLogs(next);
+  }
+
+  function updateOptLog(key, setIdx, field, value) {
+    dirtyDays.current[activeDay] = true;
+    // Build next state synchronously
+    var prev = optLogsRef.current;
+    var cur = prev[key] || [];
+    var updated = cur.slice();
+    if (!updated[setIdx]) updated[setIdx] = {};
+    updated[setIdx] = Object.assign({}, updated[setIdx], { [field]: value });
+    var next = Object.assign({}, prev, { [key]: updated });
+    // Persist BEFORE setState so data is never lost
+    lsSet(LS_OPTIONAL, next);
+    optLogsRef.current = next;
+    setOptLogs(next);
+  }
+
+  function getOptLog(key) { return optLogs[key] || []; }
+
+  function clearDayLogs() {
+    var nextLogs = Object.assign({}, logsRef.current);
+    day.supersets.forEach(function(ss, si) { ss.exercises.forEach(function(ex, ei) { delete nextLogs[makeKey(activeDay, si, ei)]; }); });
+    lsSet(LS_LOGS, nextLogs);
+    logsRef.current = nextLogs;
+    setLogs(nextLogs);
+
+    var nextOpt = Object.assign({}, optLogsRef.current);
+    delete nextOpt[activeDay + "-swings"]; delete nextOpt[activeDay + "-plank"];
+    lsSet(LS_OPTIONAL, nextOpt);
+    optLogsRef.current = nextOpt;
+    setOptLogs(nextOpt);
+  }
+
+  function toggleTheme() {
+    var next = !isDark;
+    setIsDark(next);
+    lsSet(LS_THEME, next ? "dark" : "light");
+  }
+
+  var inpStyle = {
+    background: T.input, border: "1px solid " + T.border, borderRadius: 5,
+    color: T.text, fontFamily: "monospace", fontSize: 13,
+    padding: "7px 4px", width: "100%", textAlign: "center", outline: "none",
+    MozAppearance: "textfield",
+  };
+
+  return (
+    <div style={{ minHeight:"100vh", background:T.bg, color:T.text, fontFamily:"'DM Sans',sans-serif", paddingBottom:100 }}>
+      <style>{"@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;900&family=Bebas+Neue&display=swap'); *{box-sizing:border-box} input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0} input[type=number]{-moz-appearance:textfield}"}</style>
+
+      <RestTimer color={day.color} isDark={isDark} />
+      {showHistory && <HistoryPanel onClose={function() { setShowHistory(false); }} isDark={isDark} />}
+      {showPRs && <PRBoard onClose={function() { setShowPRs(false); }} isDark={isDark} />}
+
+      {newPR && (
+        <div onClick={function() { setNewPR(null); }} style={{ position:"fixed", top:20, left:"50%", transform:"translateX(-50%)", zIndex:2000, background:"#F5A623", borderRadius:8, padding:"10px 20px", cursor:"pointer", boxShadow:"0 4px 24px #F5A62366", display:"flex", alignItems:"center", gap:10 }}>
+          <span style={{ fontSize:18 }}>🏆</span>
+          <div>
+            <div style={{ fontFamily:"monospace", fontSize:11, fontWeight:700, color:"#000" }}>NEW PERSONAL RECORD!</div>
+            <div style={{ fontFamily:"monospace", fontSize:10, color:"#333" }}>{newPR}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <div style={{ borderBottom:"1px solid "+T.border, padding:"20px 24px 16px", display:"flex", alignItems:"flex-end", gap:16, flexWrap:"wrap" }}>
+        <div>
+          <div style={{ fontFamily:"'Bebas Neue',sans-serif", fontSize:40, letterSpacing:"0.06em", lineHeight:1, color:T.text }}>HYPERTROPHY PROTOCOL</div>
+          <div style={{ fontFamily:"monospace", fontSize:11, color:T.muted, marginTop:4 }}>6-DAY / 2x FREQUENCY / 3x8-12 / SUB-60 MIN</div>
+        </div>
+        <div style={{ marginLeft:"auto", display:"flex", gap:8, flexWrap:"wrap", alignItems:"center" }}>
+          {["TRT","BPC-157","SERMORELIN"].map(function(p) {
+            return <span key={p} style={{ fontFamily:"monospace", fontSize:10, color:T.sub, background:"rgba(128,128,128,0.1)", border:"1px solid rgba(128,128,128,0.2)", borderRadius:4, padding:"2px 7px", marginRight:4 }}>{p}</span>;
+          })}
+          {streak > 0 && <span style={{ fontFamily:"monospace", fontSize:10, color:"#F5A623", background:"#F5A62318", border:"1px solid #F5A62344", borderRadius:4, padding:"2px 8px" }}>🔥 {streak} WEEK{streak!==1?"S":""}</span>}
+          {saveFlash && <span style={{ fontFamily:"monospace", fontSize:10, color:"#00B383" }}>SAVED</span>}
+          <div style={{ display:"flex", alignItems:"center", gap:6, background:T.section, border:"1px solid "+(timerOver?"#E8453C66":T.border), borderRadius:5, padding:"5px 10px" }}>
+            <span style={{ fontFamily:"monospace", fontSize:13, fontWeight:700, color: timerOver ? "#E8453C" : timerRunning ? day.color : T.muted }}>
+              {timerDisplay}
+            </span>
+            {!timerRunning
+              ? <button onClick={timerStart2} style={{ background:day.color, border:"none", borderRadius:3, color:"#fff", fontFamily:"monospace", fontSize:9, padding:"2px 6px", cursor:"pointer", fontWeight:700 }}>START</button>
+              : <button onClick={timerPause} style={{ background:"transparent", border:"1px solid "+T.borderMid, borderRadius:3, color:T.sub, fontFamily:"monospace", fontSize:9, padding:"2px 6px", cursor:"pointer" }}>PAUSE</button>
+            }
+            {timerElapsed > 0 && <button onClick={timerReset} style={{ background:"transparent", border:"none", color:T.faint, fontFamily:"monospace", fontSize:9, cursor:"pointer", padding:0 }}>X</button>}
+          </div>
+          <button onClick={function() { setShowPRs(true); }} style={{ background:"transparent", border:"1px solid "+T.borderMid, borderRadius:5, color:T.muted, fontFamily:"monospace", fontSize:10, padding:"6px 10px", cursor:"pointer" }}>🏆 PRs</button>
+          <button onClick={function() { setShowHistory(true); }} style={{ background:"transparent", border:"1px solid "+T.borderMid, borderRadius:5, color:T.muted, fontFamily:"monospace", fontSize:10, padding:"6px 10px", cursor:"pointer" }}>HISTORY {historyCount > 0 ? "("+historyCount+")" : ""}</button>
+          <button onClick={toggleTheme} style={{ background:"transparent", border:"1px solid "+T.borderMid, borderRadius:5, color:T.muted, fontSize:14, padding:"6px 10px", cursor:"pointer" }}>{isDark ? "☀️" : "🌙"}</button>
+        </div>
+      </div>
+
+      {/* Day Tabs */}
+      <div style={{ display:"flex", overflowX:"auto", padding:"16px 24px 0", gap:8, borderBottom:"1px solid "+T.border }}>
+        {DAYS.map(function(d, i) {
+          var hasData = d.supersets.some(function(ss, si) {
+            return ss.exercises.some(function(ex, ei) {
+              var sl = logs[makeKey(i, si, ei)];
+              return sl && sl.some(function(s) { return s.weight || s.reps; });
+            });
+          });
+          return (
+            <button key={i} onClick={function() { setActiveDay(i); setExpandedEx(null); }}
+              style={{ background: activeDay===i ? d.color : "transparent", border:"1px solid "+(activeDay===i?d.color:T.borderMid), borderBottom:"none", borderRadius:"6px 6px 0 0", color: activeDay===i ? "#fff" : T.muted, fontFamily:"monospace", fontSize:10, padding:"8px 14px", cursor:"pointer", whiteSpace:"nowrap", fontWeight: activeDay===i ? "700" : "400", position:"relative" }}>
+              {d.day.toUpperCase()}
+              {hasData && activeDay !== i && <span style={{ position:"absolute", top:4, right:4, width:5, height:5, borderRadius:"50%", background:d.color }}/>}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ padding:"0 24px" }}>
+        {/* Day Header */}
+        <div style={{ padding:"20px 0 16px", display:"flex", alignItems:"center", gap:12, flexWrap:"wrap", borderBottom:"1px solid "+T.border, marginBottom:20 }}>
+          <div style={{ fontFamily:"monospace", fontSize:13, letterSpacing:"0.18em", color:day.color, background:day.color+"18", border:"1px solid "+day.color+"40", borderRadius:4, padding:"4px 10px" }}>{day.tag}</div>
+          <div style={{ fontSize:20, fontWeight:700, color:T.text }}>{day.focus}</div>
+          <button onClick={clearDayLogs} style={{ marginLeft:"auto", background:"transparent", border:"1px solid "+T.borderMid, borderRadius:4, color:T.muted, fontFamily:"monospace", fontSize:9, padding:"5px 10px", cursor:"pointer" }}>CLEAR LOG</button>
+        </div>
+
+        {/* Protocol Note */}
+        <div style={{ background:T.section, border:"1px solid "+T.border, borderLeft:"3px solid "+day.color, borderRadius:6, padding:"12px 16px", marginBottom:16, fontSize:13, lineHeight:1.6, color:T.sub }}>
+          <span style={{ fontFamily:"monospace", fontSize:10, color:day.color, display:"block", marginBottom:4 }}>PROTOCOL NOTE</span>
+          {day.note}
+        </div>
+
+        {/* Session Notes */}
+        {(function() {
+          var noteKey = todayISO() + "-" + activeDay;
+          var noteVal = notes[noteKey] || "";
+          var hasNote = noteVal.trim().length > 0;
+          return (
+            <div style={{ marginBottom:24 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom: notesExpanded ? 10 : 0 }}>
+                <button onClick={function() { setNotesExpanded(function(p) { return !p; }); }}
+                  style={{ display:"flex", alignItems:"center", gap:8, background:"transparent", border:"1px solid "+(hasNote ? day.color+"66" : T.borderMid), borderRadius:6, color:hasNote ? day.color : T.muted, fontFamily:"monospace", fontSize:10, padding:"6px 14px", cursor:"pointer", letterSpacing:"0.08em" }}>
+                  <span style={{ fontSize:14 }}>📝</span>
+                  SESSION NOTES {hasNote ? "(SAVED)" : "(OPTIONAL)"}
+                  <span style={{ fontSize:14, marginLeft:4 }}>{notesExpanded ? "▲" : "▼"}</span>
+                </button>
+                {hasNote && !notesExpanded && (
+                  <span style={{ fontFamily:"monospace", fontSize:10, color:T.sub, fontStyle:"italic", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:300 }}>
+                    {noteVal.trim().slice(0, 60)}{noteVal.length > 60 ? "..." : ""}
+                  </span>
+                )}
+              </div>
+              {notesExpanded && (
+                <div style={{ background:T.card, border:"1px solid "+(hasNote ? day.color+"44" : T.border), borderRadius:8, padding:16 }}>
+                  <div style={{ fontFamily:"monospace", fontSize:9, color:T.muted, marginBottom:8, letterSpacing:"0.1em" }}>
+                    HOW DID YOU FEEL? WHAT WORKED? WHAT HURT? NOTES FOR FUTURE YOU.
+                  </div>
+                  <textarea
+                    value={noteVal}
+                    onChange={function(e) {
+                      var val = e.target.value;
+                      setNotes(function(prev) {
+                        var updated = Object.assign({}, prev);
+                        if (val.trim()) { updated[noteKey] = val; } else { delete updated[noteKey]; }
+                        return updated;
+                      });
+                      dirtyDays.current[activeDay] = true;
+                    }}
+                    placeholder={"e.g. Left shoulder felt tight on OHP. Hit a new squat PR at 225. Energy was good today. Sleep was 7 hours."}
+                    rows={4}
+                    style={{ width:"100%", background:T.input, border:"1px solid "+T.border, borderRadius:6, color:T.text, fontFamily:"'DM Sans',sans-serif", fontSize:13, lineHeight:1.6, padding:"10px 12px", outline:"none", resize:"vertical", boxSizing:"border-box" }}
+                  />
+                  {hasNote && (
+                    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginTop:8 }}>
+                      <span style={{ fontFamily:"monospace", fontSize:9, color:T.muted }}>{noteVal.length} CHARS</span>
+                      <button onClick={function() {
+                        setNotes(function(prev) { var u = Object.assign({}, prev); delete u[noteKey]; return u; });
+                      }} style={{ background:"transparent", border:"1px solid #E8453C44", borderRadius:4, color:"#E8453C", fontFamily:"monospace", fontSize:9, padding:"3px 10px", cursor:"pointer" }}>
+                        CLEAR NOTE
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* Equipment */}
+        <div style={{ marginBottom:24 }}>
+          <div style={{ fontFamily:"monospace", fontSize:10, color:T.muted, marginBottom:8 }}>EQUIPMENT</div>
+          <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+            {day.equipment.map(function(e, i) {
+              return <span key={i} style={{ fontSize:12, color:T.sub, background:T.section, border:"1px solid "+T.border, borderRadius:4, padding:"4px 10px" }}>{e}</span>;
+            })}
+          </div>
+        </div>
+
+        {/* Supersets */}
+        {day.supersets.map(function(ss, si) {
+          return (
+            <div key={si} style={{ marginBottom:24 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+                <div style={{ height:1, width:20, background:day.color, opacity:.5 }}/>
+                <span style={{ fontFamily:"monospace", fontSize:10, color:day.color }}>{ss.label.toUpperCase()}</span>
+                <span style={{ fontSize:10, color:T.muted, fontFamily:"monospace", border:"1px solid "+T.borderMid, borderRadius:3, padding:"1px 6px" }}>
+                  {ss.exercises.length > 1 ? "SUPERSET - REST 90s AFTER BOTH" : "REST 60-90s"}
+                </span>
+              </div>
+              {ss.exercises.map(function(ex, ei) {
+                var key = makeKey(activeDay, si, ei);
+                var open = expandedEx === key;
+                var sl = getLog(key, ex.numSets);
+                var hasLog = sl.some(function(s) { return s.weight || s.reps; });
+                var done = isComplete(sl);
+                var last = getLastBest(day.day, ex.name);
+                var suggest = getOverloadSuggestion(day.day, ex.name);
+
+                return (
+                  <div key={ei} style={{ background: done ? (isDark?"#0a120e":"#efffef") : T.card, border:"1px solid "+(done?"#22c55e55":hasLog?day.color+"44":T.border), borderRadius:8, marginBottom:8, overflow:"hidden" }}>
+                    <div onClick={function() { setExpandedEx(open ? null : key); }} style={{ display:"flex", alignItems:"center", padding:"14px 16px", cursor:"pointer", gap:12 }}>
+                      <div style={{ minWidth:28, height:28, borderRadius:"50%", background:done?"#22c55e22":day.color+"22", border:"1px solid "+(done?"#22c55e66":day.color+"44"), display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"monospace", fontSize:done?14:11, color:done?"#22c55e":day.color, fontWeight:700 }}>
+                        {done ? "✓" : si*2+ei+1}
+                      </div>
+                      <div style={{ flex:1 }}>
+                        <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4, flexWrap:"wrap" }}>
+                          <span style={{ fontWeight:600, fontSize:15, color:done?"#22c55e":T.text }}>{ex.name}</span>
+                          {done && <span style={{ fontFamily:"monospace", fontSize:9, color:"#22c55e", background:"#22c55e18", border:"1px solid #22c55e33", borderRadius:3, padding:"1px 6px" }}>COMPLETE</span>}
+                          {!done && hasLog && <span style={{ fontFamily:"monospace", fontSize:9, color:day.color, opacity:.7 }}>IN PROGRESS</span>}
+                        </div>
+                        <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                          {ex.muscles.slice(0,3).map(function(m, mi) {
+                            return <span key={mi} style={{ fontSize:11, color:T.sub }}>{m}{mi < Math.min(ex.muscles.length,3)-1 ? " ·" : ""}</span>;
+                          })}
+                        </div>
+                      </div>
+                      <div style={{ fontFamily:"monospace", fontSize:12, color:done?"#22c55e":day.color, fontWeight:700, minWidth:60, textAlign:"right" }}>{ex.sets}</div>
+                      <button style={{ background:"none", border:"none", color:T.muted, cursor:"pointer", fontSize:20, padding:"0 0 0 8px", lineHeight:1 }}>{open?"−":"+"}</button>
+                    </div>
+
+                    {open && (
+                      <div style={{ borderTop:"1px solid "+(done?"#22c55e22":T.border), padding:16, display:"grid", gap:16 }}>
+                        <div>
+                          <div style={{ fontFamily:"monospace", fontSize:10, color:T.muted, marginBottom:6 }}>ALL MUSCLES</div>
+                          <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                            {ex.muscles.map(function(m, mi) {
+                              return <span key={mi} style={{ fontSize:11, color:T.sub, background:T.section, border:"1px solid "+T.border, borderRadius:3, padding:"3px 8px" }}>{m}</span>;
+                            })}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontFamily:"monospace", fontSize:10, color:T.muted, marginBottom:5 }}>EQUIPMENT</div>
+                          <div style={{ fontSize:13, color:T.sub }}>{ex.equipment}</div>
+                        </div>
+                        <div>
+                          <div style={{ fontFamily:"monospace", fontSize:10, color:day.color, marginBottom:5 }}>WHY THIS EXERCISE</div>
+                          <div style={{ fontSize:13, color:T.sub, lineHeight:1.65 }}>{ex.why}</div>
+                        </div>
+                        {ex.vid && (
+                          <a href={"https://www.youtube.com/watch?v="+ex.vid} target="_blank" rel="noopener noreferrer"
+                            style={{ display:"inline-flex", alignItems:"center", gap:8, background:"#ff000018", border:"1px solid #ff000044", borderRadius:6, padding:"8px 14px", textDecoration:"none" }}>
+                            <svg width={16} height={16} viewBox="0 0 24 24" fill="#ff3333"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-2.75 12.64 12.64 0 0 0-8.07 0A4.83 4.83 0 0 1 4.41 6.69 49.13 49.13 0 0 0 4 12a49.13 49.13 0 0 0 .41 5.31 4.83 4.83 0 0 1 3.74 2.75 12.64 12.64 0 0 0 8.07 0 4.83 4.83 0 0 1 3.77-2.75A49.13 49.13 0 0 0 20 12a49.13 49.13 0 0 0-.41-5.31zM10 15V9l5 3-5 3z"/></svg>
+                            <span style={{ fontFamily:"monospace", fontSize:10, color:"#ff5555", fontWeight:700 }}>WATCH TUTORIAL</span>
+                          </a>
+                        )}
+
+                        {/* Last session + overload */}
+                        {last && (
+                          <div>
+                            <div style={{ background:T.section, border:"1px solid "+day.color+"33", borderRadius:6, padding:"8px 12px", marginBottom:6, display:"flex", gap:16, flexWrap:"wrap", alignItems:"center" }}>
+                              <div>
+                                <div style={{ fontFamily:"monospace", fontSize:9, color:T.muted, marginBottom:2 }}>LAST SESSION</div>
+                                <div style={{ fontFamily:"monospace", fontSize:13, color:day.color, fontWeight:700 }}>{last.weight} lbs x {last.reps} reps</div>
+                              </div>
+                              {calc1RM(last.weight, last.reps) && (
+                                <div>
+                                  <div style={{ fontFamily:"monospace", fontSize:9, color:T.muted, marginBottom:2 }}>EST. 1RM</div>
+                                  <div style={{ fontFamily:"monospace", fontSize:13, color:T.sub, fontWeight:700 }}>{calc1RM(last.weight, last.reps)} lbs</div>
+                                </div>
+                              )}
+                              <div style={{ fontFamily:"monospace", fontSize:9, color:T.faint, marginLeft:"auto" }}>BEAT THIS</div>
+                            </div>
+                            {suggest && (
+                              <div style={{ background: suggest.type==="increase"?"#22c55e12":"#2D7FF912", border:"1px solid "+(suggest.type==="increase"?"#22c55e33":"#2D7FF933"), borderRadius:5, padding:"6px 12px", display:"flex", alignItems:"center", gap:8 }}>
+                                <span style={{ fontSize:14 }}>{suggest.type==="increase"?"📈":"🎯"}</span>
+                                <span style={{ fontFamily:"monospace", fontSize:10, color:suggest.type==="increase"?"#22c55e":"#2D7FF9" }}>{suggest.message}</span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Set Tracker */}
+                        <div style={{ borderTop:"1px solid "+T.border, paddingTop:14 }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12, flexWrap:"wrap" }}>
+                            <div style={{ fontFamily:"monospace", fontSize:10, color:done?"#22c55e":day.color }}>
+                              SET TRACKER {done && <span style={{ opacity:.6 }}>-- ALL SETS COMPLETE</span>}
+                            </div>
+                            {ex.log && (
+                              <div style={{ fontFamily:"monospace", fontSize:9, fontWeight:700, padding:"2px 8px", borderRadius:20, background:ex.log==="combined"?"#2D7FF922":"#F5A62322", border:"1px solid "+(ex.log==="combined"?"#2D7FF966":"#F5A62366"), color:ex.log==="combined"?"#2D7FF9":"#F5A623" }}>
+                                {ex.log==="combined" ? "LOG COMBINED WEIGHT" : "LOG PER SIDE"}
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ display:"grid", gridTemplateColumns:"52px 1fr 1fr", gap:"4px 8px", marginBottom:6 }}>
+                            <div/>
+                            <div style={{ fontFamily:"monospace", fontSize:9, color:T.muted, textAlign:"center" }}>{ex.log==="combined"?"WEIGHT - BOTH SIDES":ex.log==="per-side"?"WEIGHT - ONE SIDE":"WEIGHT (lbs)"}</div>
+                            <div style={{ fontFamily:"monospace", fontSize:9, color:T.muted, textAlign:"center" }}>REPS</div>
+                          </div>
+                          {sl.map(function(s, setIdx) {
+                            var setDone = s.weight !== "" && s.reps !== "";
+                            var dc = done ? "#22c55e" : day.color;
+                            return (
+                              <div key={setIdx} style={{ display:"grid", gridTemplateColumns:"52px 1fr 1fr", gap:"4px 8px", marginBottom:6, alignItems:"center" }}>
+                                <div style={{ fontFamily:"monospace", fontSize:10, color:setDone?"#22c55e":(s.weight||s.reps)?day.color:T.faint, textAlign:"right", paddingRight:8, display:"flex", alignItems:"center", justifyContent:"flex-end", gap:4 }}>
+                                  {setDone && <span>✓</span>}<span>SET {setIdx+1}</span>
+                                </div>
+                                <input type="number" style={Object.assign({}, inpStyle, { borderColor: setDone ? "#22c55e33" : T.border })}
+                                  inputMode="decimal" placeholder="--" value={s.weight}
+                                  onClick={function(e) { e.stopPropagation(); }}
+                                  onChange={function(e) { updateLog(key, setIdx, "weight", e.target.value, ex.name); }}/>
+                                <input type="number" style={Object.assign({}, inpStyle, { borderColor: setDone ? "#22c55e33" : T.border })}
+                                  inputMode="numeric" placeholder="--" value={s.reps}
+                                  onClick={function(e) { e.stopPropagation(); }}
+                                  onChange={function(e) { updateLog(key, setIdx, "reps", e.target.value, ex.name); }}/>
+                              </div>
+                            );
+                          })}
+                          {hasLog && (function() {
+                            var filled = sl.filter(function(s) { return s.weight && s.reps; });
+                            if (!filled.length) return null;
+                            var vol = filled.reduce(function(a, s) { return a + (parseFloat(s.weight)||0)*(parseInt(s.reps)||0); }, 0);
+                            var maxW = Math.max.apply(null, filled.map(function(s) { return parseFloat(s.weight)||0; }));
+                            var bestSet = filled.reduce(function(b, s) { return (parseFloat(s.weight)||0)>(parseFloat(b.weight)||0)?s:b; }, filled[0]);
+                            var orm = calc1RM(bestSet.weight, bestSet.reps);
+                            var ac = done ? "#22c55e" : day.color;
+                            var stats = [{ l:"TOTAL VOL", v:vol.toLocaleString()+" lbs" }, { l:"TOP WEIGHT", v:maxW+" lbs" }, { l:"SETS DONE", v:filled.length+"/"+ex.numSets }];
+                            if (orm) stats.push({ l:"EST. 1RM", v:orm+" lbs" });
+                            return (
+                              <div style={{ marginTop:12, display:"flex", gap:10, flexWrap:"wrap" }}>
+                                {stats.map(function(st, i) {
+                                  return (
+                                    <div key={i} style={{ background:ac+"0e", border:"1px solid "+ac+"22", borderRadius:5, padding:"6px 12px", textAlign:"center", flex:1, minWidth:80 }}>
+                                      <div style={{ fontFamily:"monospace", fontSize:9, color:T.muted, marginBottom:2 }}>{st.l}</div>
+                                      <div style={{ fontFamily:"monospace", fontSize:13, color:ac, fontWeight:700 }}>{st.v}</div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+
+        {/* Optional Bonus Superset */}
+        {(function() {
+          var swingKey = activeDay + "-swings";
+          var plankKey = activeDay + "-plank";
+          var swingLog = getOptLog(swingKey);
+          var plankLog = getOptLog(plankKey);
+          var hasSwings = swingLog.some(function(s) { return s.weight || s.reps; });
+          var hasPlanks = plankLog.some(function(s) { return s.time; });
+          var hasAny = hasSwings || hasPlanks ;
+
+          return (
+            <div style={{ marginBottom:24 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
+                <div style={{ height:1, width:20, background:T.borderMid, opacity:.6 }}/>
+                <span style={{ fontFamily:"monospace", fontSize:10, color:T.muted }}>OPTIONAL BONUS SUPERSET</span>
+                {hasAny && <span style={{ fontFamily:"monospace", fontSize:9, color:"#22c55e" }}>LOGGED</span>}
+                <button onClick={function() { setOptExpanded(function(p) { return !p; }); }}
+                  style={{ marginLeft:"auto", background:"transparent", border:"1px solid "+T.borderMid, borderRadius:4, color:T.muted, fontFamily:"monospace", fontSize:9, padding:"3px 10px", cursor:"pointer" }}>
+                  {optExpanded ? "HIDE" : "SHOW"}
+                </button>
+              </div>
+
+              {optExpanded && (
+                <div>
+                  {/* KB Swings */}
+                  <div style={{ background:hasSwings?(isDark?"#0a120e":"#efffef"):T.card, border:"1px solid "+(hasSwings?"#22c55e44":T.border), borderRadius:8, marginBottom:8, padding:"14px 16px" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:12 }}>
+                      <div style={{ minWidth:28, height:28, borderRadius:"50%", background:"#F5A62322", border:"1px solid #F5A62344", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"monospace", fontSize:11, color:"#F5A623", fontWeight:700 }}>KB</div>
+                      <div>
+                        <div style={{ fontWeight:600, fontSize:15, color:hasSwings?"#22c55e":T.text }}>Kettlebell Swing</div>
+                        <div style={{ fontSize:11, color:T.sub }}>Glutes (Primary) · Hamstrings · Core</div>
+                      </div>
+                      <div style={{ marginLeft:"auto", fontFamily:"monospace", fontSize:9, color:"#F5A623", background:"#F5A62311", border:"1px solid #F5A62333", borderRadius:20, padding:"2px 8px" }}>LOG COMBINED</div>
+                    </div>
+                    <div style={{ display:"grid", gridTemplateColumns:"52px 1fr 1fr", gap:"4px 8px", marginBottom:6 }}>
+                      <div/><div style={{ fontFamily:"monospace", fontSize:9, color:T.muted, textAlign:"center" }}>WEIGHT (lbs)</div><div style={{ fontFamily:"monospace", fontSize:9, color:T.muted, textAlign:"center" }}>REPS</div>
+                    </div>
+                    {[0,1,2].map(function(setIdx) {
+                      var s = swingLog[setIdx] || { weight:"", reps:"" };
+                      var setDone = s.weight && s.reps;
+                      return (
+                        <div key={setIdx} style={{ display:"grid", gridTemplateColumns:"52px 1fr 1fr", gap:"4px 8px", marginBottom:6, alignItems:"center" }}>
+                          <div style={{ fontFamily:"monospace", fontSize:10, color:setDone?"#22c55e":"#F5A623", textAlign:"right", paddingRight:8 }}>SET {setIdx+1}</div>
+                          <input type="number" style={Object.assign({}, inpStyle, { borderColor:setDone?"#22c55e33":T.border })} inputMode="decimal" placeholder="--" value={s.weight||""} onChange={function(e) { updateOptLog(swingKey, setIdx, "weight", e.target.value); }}/>
+                          <input type="number" style={Object.assign({}, inpStyle, { borderColor:setDone?"#22c55e33":T.border })} inputMode="numeric" placeholder="--" value={s.reps||""} onChange={function(e) { updateOptLog(swingKey, setIdx, "reps", e.target.value); }}/>
+                        </div>
+                      );
+                    })}
+                    {hasSwings && (function() {
+                      var filled = swingLog.filter(function(s) { return s.weight && s.reps; });
+                      if (!filled.length) return null;
+                      var vol = filled.reduce(function(a, s) { return a+(parseFloat(s.weight)||0)*(parseInt(s.reps)||0); }, 0);
+                      return (
+                        <div style={{ marginTop:8, display:"flex", gap:10 }}>
+                          <div style={{ background:"#F5A6230e", border:"1px solid #F5A62322", borderRadius:5, padding:"5px 12px", flex:1, textAlign:"center" }}>
+                            <div style={{ fontFamily:"monospace", fontSize:9, color:T.muted }}>VOLUME</div>
+                            <div style={{ fontFamily:"monospace", fontSize:13, color:"#F5A623", fontWeight:700 }}>{vol.toLocaleString()} lbs</div>
+                          </div>
+                          <div style={{ background:"#F5A6230e", border:"1px solid #F5A62322", borderRadius:5, padding:"5px 12px", flex:1, textAlign:"center" }}>
+                            <div style={{ fontFamily:"monospace", fontSize:9, color:T.muted }}>SETS</div>
+                            <div style={{ fontFamily:"monospace", fontSize:13, color:"#F5A623", fontWeight:700 }}>{filled.length}/3</div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Forearm Plank */}
+                  <div style={{ background:hasPlanks?(isDark?"#0a120e":"#efffef"):T.card, border:"1px solid "+(hasPlanks?"#22c55e44":T.border), borderRadius:8, marginBottom:8, padding:"14px 16px" }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:12 }}>
+                      <div style={{ minWidth:28, height:28, borderRadius:"50%", background:"#00B38322", border:"1px solid #00B38344", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"monospace", fontSize:11, color:"#00B383", fontWeight:700 }}>PL</div>
+                      <div>
+                        <div style={{ fontWeight:600, fontSize:15, color:hasPlanks?"#22c55e":T.text }}>Forearm Plank</div>
+                        <div style={{ fontSize:11, color:T.sub }}>Core Stabilizers · Obliques · Transverse Abdominis</div>
+                      </div>
+                    </div>
+                    <div style={{ display:"grid", gridTemplateColumns:"52px 1fr", gap:"4px 8px", marginBottom:6 }}>
+                      <div/><div style={{ fontFamily:"monospace", fontSize:9, color:T.muted, textAlign:"center" }}>HOLD TIME (seconds)</div>
+                    </div>
+                    {[0,1,2].map(function(setIdx) {
+                      var s = plankLog[setIdx] || { time:"" };
+                      var setDone = !!s.time;
+                      return (
+                        <div key={setIdx} style={{ display:"grid", gridTemplateColumns:"52px 1fr", gap:"4px 8px", marginBottom:6, alignItems:"center" }}>
+                          <div style={{ fontFamily:"monospace", fontSize:10, color:setDone?"#22c55e":"#00B383", textAlign:"right", paddingRight:8 }}>SET {setIdx+1}</div>
+                          <input type="number" style={Object.assign({}, inpStyle, { borderColor:setDone?"#22c55e33":T.border })} inputMode="numeric" placeholder="-- secs" value={s.time||""} onChange={function(e) { updateOptLog(plankKey, setIdx, "time", e.target.value); }}/>
+                        </div>
+                      );
+                    })}
+                    {hasPlanks && (function() {
+                      var filled = plankLog.filter(function(s) { return s.time; });
+                      if (!filled.length) return null;
+                      var total = filled.reduce(function(a, s) { return a+(parseInt(s.time)||0); }, 0);
+                      return (
+                        <div style={{ marginTop:8, display:"flex", gap:10 }}>
+                          <div style={{ background:"#00B3830e", border:"1px solid #00B38322", borderRadius:5, padding:"5px 12px", flex:1, textAlign:"center" }}>
+                            <div style={{ fontFamily:"monospace", fontSize:9, color:T.muted }}>TOTAL TIME</div>
+                            <div style={{ fontFamily:"monospace", fontSize:13, color:"#00B383", fontWeight:700 }}>{total}s</div>
+                          </div>
+                          <div style={{ background:"#00B3830e", border:"1px solid #00B38322", borderRadius:5, padding:"5px 12px", flex:1, textAlign:"center" }}>
+                            <div style={{ fontFamily:"monospace", fontSize:9, color:T.muted }}>SETS</div>
+                            <div style={{ fontFamily:"monospace", fontSize:13, color:"#00B383", fontWeight:700 }}>{filled.length}/3</div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+        <div style={{ marginTop:8, background:T.card, border:"1px solid "+T.border, borderRadius:8, padding:16 }}>
+          <div style={{ fontFamily:"monospace", fontSize:10, color:T.muted, marginBottom:12 }}>WEEKLY MUSCLE FREQUENCY</div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))", gap:8 }}>
+            {[{m:"Chest",d:"Mon + Fri"},{m:"Triceps",d:"Mon + Fri"},{m:"Back",d:"Tue + Sat"},{m:"Biceps",d:"Tue + Sat"},{m:"Shoulders",d:"Thu + Mon"},{m:"Quads",d:"Wed + Sat"},{m:"Hamstrings",d:"Wed + Sat"},{m:"Glutes",d:"Wed + Sat"},{m:"Core",d:"Mon + Thu"}].map(function(it, i) {
+              return (
+                <div key={i} style={{ background:T.section, border:"1px solid "+T.border, borderRadius:5, padding:"8px 10px" }}>
+                  <div style={{ fontSize:12, fontWeight:600, color:T.text, marginBottom:2 }}>{it.m}</div>
+                  <div style={{ fontFamily:"monospace", fontSize:9, color:day.color, marginBottom:2 }}>2x/WEEK</div>
+                  <div style={{ fontSize:10, color:T.muted }}>{it.d}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Weekly Frequency */}
+        <div style={{ marginTop:8, background:T.card, border:"1px solid "+T.border, borderRadius:8, padding:16 }}>
+          <div style={{ fontFamily:"monospace", fontSize:10, color:T.muted, marginBottom:12 }}>WEEKLY MUSCLE FREQUENCY</div>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(140px,1fr))", gap:8 }}>
+            {[{m:"Chest",d:"Mon + Fri"},{m:"Triceps",d:"Mon + Fri"},{m:"Back",d:"Tue + Sat"},{m:"Biceps",d:"Tue + Sat"},{m:"Shoulders",d:"Thu + Mon"},{m:"Quads",d:"Wed + Sat"},{m:"Hamstrings",d:"Wed + Sat"},{m:"Glutes",d:"Wed + Sat"},{m:"Core",d:"Mon + Thu"}].map(function(it, i) {
+              return (
+                <div key={i} style={{ background:T.section, border:"1px solid "+T.border, borderRadius:5, padding:"8px 10px" }}>
+                  <div style={{ fontSize:12, fontWeight:600, color:T.text, marginBottom:2 }}>{it.m}</div>
+                  <div style={{ fontFamily:"monospace", fontSize:9, color:day.color, marginBottom:2 }}>2x/WEEK</div>
+                  <div style={{ fontSize:10, color:T.muted }}>{it.d}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Recovery Heatmap */}
+        <RecoveryHeatmap isDark={isDark} liveLogs={logs} />
+
+        {/* Sunday Note */}
+        <div style={{ marginTop:16, background:T.section, border:"1px solid "+T.border, borderRadius:6, padding:"12px 16px", fontSize:12, color:T.muted, lineHeight:1.6 }}>
+          <span style={{ fontFamily:"monospace", fontSize:9, color:T.muted, display:"block", marginBottom:4 }}>SUNDAY - REST & RECOVERY</span>
+          Complete rest or light walking. Sermorelin peaks during deep sleep. Prioritize 7-9 hours. BPC-157 works systemically during rest.
+        </div>
+
+        {/* Weekly Volume */}
+        {(function() {
+          var vol = getWeeklyVolume();
+          var entries = Object.entries(vol).sort(function(a, b) { return b[1] - a[1]; });
+          if (!entries.length) return null;
+          var maxVol = entries[0][1];
+          var colorMap = { Chest:"#E8453C", Triceps:"#E8453C", Lats:"#2D7FF9", Back:"#2D7FF9", Biceps:"#2D7FF9", Brachialis:"#2D7FF9", Quads:"#00B383", Glutes:"#00B383", Hamstrings:"#00B383", Shoulders:"#F5A623", Core:"#9B59F5", Obliques:"#9B59F5" };
+          return (
+            <div style={{ marginTop:16, background:T.card, border:"1px solid "+T.border, borderRadius:8, padding:16 }}>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+                <div style={{ fontFamily:"monospace", fontSize:10, color:T.muted }}>THIS WEEK'S VOLUME BY MUSCLE</div>
+                <div style={{ fontFamily:"monospace", fontSize:9, color:T.faint }}>TOTAL: {entries.reduce(function(a, e) { return a + e[1]; }, 0).toLocaleString()} lbs</div>
+              </div>
+              {entries.map(function(entry) {
+                var muscle = entry[0]; var v = entry[1];
+                var pct = Math.round((v / maxVol) * 100);
+                var barColor = "#555";
+                Object.keys(colorMap).forEach(function(k) { if (muscle.indexOf(k) !== -1) barColor = colorMap[k]; });
+                return (
+                  <div key={muscle} style={{ marginBottom:8 }}>
+                    <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
+                      <span style={{ fontFamily:"monospace", fontSize:10, color:T.sub }}>{muscle}</span>
+                      <span style={{ fontFamily:"monospace", fontSize:10, color:T.muted }}>{v.toLocaleString()} lbs</span>
+                    </div>
+                    <div style={{ height:4, background:T.section, borderRadius:2, overflow:"hidden" }}>
+                      <div style={{ height:"100%", width:pct+"%", background:barColor, borderRadius:2 }}/>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
+      </div>
+    </div>
+  );
+}
